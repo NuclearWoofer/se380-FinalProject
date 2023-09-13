@@ -2,19 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { View, FlatList, Image, StyleSheet, Modal, TouchableOpacity, Text, Dimensions } from 'react-native';
 import axios from 'axios';
 import Animated, { Easing, withSpring, withTiming, useSharedValue, useAnimatedStyle, interpolate, Extrapolate } from 'react-native-reanimated';
+import { useRoute } from '@react-navigation/native'; // Import route hook
+
 
 type ImgurImage = {
   id: string;
   link: string;
   description: string;
+  uploadedImageUrl: string;
 };
 
 function ImgurAlbumScreen() {
+  const route = useRoute();
   const [images, setImages] = useState<ImgurImage[]>([]);
   const [selectedImage, setSelectedImage] = useState<ImgurImage | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const screenWidth = Dimensions.get('window').width;
-
   // Shared values for animations
   const opacity = useSharedValue(0); // For fade-in animation
   const translateY = useSharedValue(screenWidth); // For slide-up animation

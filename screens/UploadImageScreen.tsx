@@ -1,96 +1,80 @@
-import axios from 'axios';
 import React, { useState } from 'react';
-import { View, Button, Image, StyleSheet, Alert } from 'react-native';
-import { launchImageLibrary, ImagePickerResponse } from 'react-native-image-picker';
-// Define a custom type that includes the 'uri' property
-type CustomImagePickerResponse = ImagePickerResponse & {
-  uri?: string;
-};
+import { View, Text, Button, Image, Alert } from 'react-native';
+import * as ImagePicker from 'react-native-image-picker';
+
 function UploadImageScreen() {
-  const [selectedImage, setSelectedImage] = useState<CustomImagePickerResponse | null>(null);
+  const [imageSource, setImageSource] = useState<string | null>(null);
 
-  const selectImage = async () => {
-    try {
-      const response = await launchImageLibrary({ mediaType: 'photo' });
-
-      if (response.didCancel) {
-        // The user canceled the image selection
-        console.log('Image selection canceled');
-      } else if (response.assets && response.assets.length > 0) {
-        // Image was selected successfully
-        const selectedAsset = response.assets[0];
-        setSelectedImage({
-          ...selectedAsset,
-          uri: selectedAsset.uri || '', // Ensure uri is not undefined
-        });
+  const selectImage = () => {
+    ImagePicker.launchImageLibrary(
+      {
+        mediaType: 'photo',
+      },
+      (response) => {
+        if (!response.didCancel && response.assets && response.assets.length > 0) {
+          const firstAsset = response.assets[0];
+          if (firstAsset.uri) {
+            setImageSource(firstAsset.uri);
+            uploadImage(firstAsset.uri);
+          } else {
+            Alert.alert('Error', 'Selected image URI is undefined');
+          }
+        }
       }
+    );
+  };
+
+  const uriToBlob = async (uri: string) => {
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      return blob;
     } catch (error) {
-      // Handle any errors that occur during image selection
-      console.error('Image selection error:', error);
+      console.error(error);
+      throw new Error('Failed to convert URI to Blob');
     }
-  }
+  };
 
-  const uploadImage = () => {
-    if (!selectedImage) {
-      Alert.alert('No Image Selected', 'Please select an image before uploading.');
-      return;
-    }
+  const uploadImage = async (imageUri: string) => {
     const clientId = '4d89c1a9e541ca2';
-    const albumId = 'EhpVAMT';
+    const auth = 'Client-ID ' + clientId;
 
-    const formData = new FormData();
+    try {
+      const blob = await uriToBlob(imageUri);
 
-    // Explicitly specify the types for formData and the arguments to append
-    formData.append('image', {
-      uri: selectedImage.uri,
-      name: 'image.jpg', // Set the desired name for the image file
-    } as unknown as Blob, 'image.jpg');
+      const formData = new FormData();
+      formData.append('image', blob, 'image.jpg');
 
-    axios
-      .post(`https://api.imgur.com/3/upload`, formData, {
+      const response = await fetch('https://api.imgur.com/3/image/', {
+        method: 'POST',
         headers: {
-          Authorization: `Client-ID ${clientId}`,
+          Authorization: auth,
           'Content-Type': 'multipart/form-data',
         },
-      })
-      .then((response) => {
-        if (response.data.success) {
-          // Image uploaded successfully, you can handle the response here
-          Alert.alert('Success', 'Image uploaded to Imgur.');
-        } else {
-          Alert.alert('Error', 'Failed to upload image to Imgur.');
-        }
-      })
-      .catch((error) => {
-        console.error('Error uploading image:', error);
-        Alert.alert('Error', 'Failed to upload image to Imgur.');
+        body: formData,
       });
+
+      const responseData = await response.json();
+
+      if (response.ok) {
+        Alert.alert('Success', 'Image uploaded successfully');
+        console.log(responseData);
+      } else {
+        Alert.alert('Error', 'Failed to upload image');
+        console.error(responseData);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to upload image');
+      console.error(error);
+    }
   };
 
   return (
-    <View style={styles.container}>
-      {selectedImage && (
-        <Image source={{ uri: selectedImage.uri }} style={styles.image} />
-      )}
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      {imageSource && <Image source={{ uri: imageSource }} style={{ width: 200, height: 200 }} />}
       <Button title="Select Image" onPress={selectImage} />
-      {selectedImage && (
-        <Button title="Upload Image" onPress={uploadImage} />
-      )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  image: {
-    width: 200,
-    height: 200,
-    marginVertical: 10,
-  },
-});
 
 export default UploadImageScreen;
