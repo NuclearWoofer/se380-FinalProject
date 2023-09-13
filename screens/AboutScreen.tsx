@@ -40,11 +40,11 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   image: {
-    width: '100%', // Adjust the width as needed
-    height: 200, // Set a fixed height for the image
-    resizeMode: 'cover', // Ensure the image fills the container without stretching
-    marginTop: 20, // Add some top margin for separation
-    borderRadius: 10, // Add rounded corners
+    width: '100%', 
+    height: 200, 
+    resizeMode: 'cover', 
+    marginTop: 20, 
+    borderRadius: 10, 
   },
   
   title: {

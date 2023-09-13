@@ -48,14 +48,12 @@ function ImgurAlbumScreen() {
 
   const openModal = (image: ImgurImage) => {
     setSelectedImage(image);
-    // Start animations with faster duration and lower damping ratio
     opacity.value = withTiming(1, { duration: 100, easing: Easing.inOut(Easing.ease) });
     translateY.value = withSpring(0, { damping: 6, stiffness: 200 }); // Adjust stiffness and damping values
     setIsModalVisible(true);
   };
 
   const closeModal = () => {
-    // Start reverse animations with faster duration and lower damping ratio
     opacity.value = withTiming(0, { duration: 100, easing: Easing.inOut(Easing.ease) });
     translateY.value = withSpring(screenWidth, { damping: 2, stiffness: 150 }); // Adjust stiffness and damping values
     // After animations complete, reset the modal
