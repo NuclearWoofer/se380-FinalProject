@@ -1,0 +1,34 @@
+﻿Michael Lopez
+Matthew Bowen
+React Native
+September 18th, 2023
+
+
+React Native Final  Presentation 
+What did you build?
+* A photo gallery app that is supposed to have CRUD functionality using the Imgur API.
+
+
+Why did you build it?
+* One of my hobbies include miniature or model painting. I wanted to build something that could host my work.
+
+
+What SDKs or libraries did you use?
+* ImagePicker SDK
+* Axios Library
+
+
+Did you use anything we didn't cover in class?
+* Not really. Pretty sure axios was covered in the previous React class.
+
+
+What was the most difficult part or the most time consuming?
+* Getting the Update, Upload, and Delete functionality to work. I kept getting forbidden errors that were holding me back but was unable to find a solution. Unsure if this is an Imgur permissions thing or a lack of authorization from Imgur’s part.
+
+
+What did you find easy to accomplish?
+* Setting up the Gallery and the initial pull from Imgur.
+
+
+Answer any follow up questions from students or the instructor.
+* No, not really. Will hopefully continue to push this and fix it up so I can present this to future employers.
