@@ -1,74 +1,84 @@
 import React, { useState } from 'react';
 import { View, Text, Button, Image, Alert } from 'react-native';
-import * as ImagePicker from 'react-native-image-picker';
+import * as ImagePicker from 'expo-image-picker';
+import { useEffect } from 'react';
+import axios from 'axios'; 
 
 function UploadImageScreen() {
   const [imageSource, setImageSource] = useState<string | null>(null);
 
-  const selectImage = () => {
-    ImagePicker.launchImageLibrary(
-      {
-        mediaType: 'photo',
-      },
-      (response) => {
-        if (!response.didCancel && response.assets && response.assets.length > 0) {
-          const firstAsset = response.assets[0];
-          if (firstAsset.uri) {
-            setImageSource(firstAsset.uri);
-            uploadImage(firstAsset.uri);
-          } else {
-            Alert.alert('Error', 'Selected image URI is undefined');
-          }
-        }
+  useEffect(() => {
+    const requestPermission = async () => {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        // Handle permission denied
+        console.log('Permission denied');
       }
-    );
-  };
+    };
 
-  const uriToBlob = async (uri: string) => {
+    requestPermission();
+  }, []);
+
+  const selectImage = async () => {
     try {
-      const response = await fetch(uri);
-      const blob = await response.blob();
-      return blob;
+      const response = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+      });
+  
+      if (!response.canceled && response.assets && response.assets.length > 0) {
+        const selectedAsset = response.assets[0];
+        const imageUri = selectedAsset.uri;
+        setImageSource(imageUri);
+        uploadImage(imageUri);
+      }
     } catch (error) {
-      console.error(error);
-      throw new Error('Failed to convert URI to Blob');
+      console.error('Error selecting image:', error);
     }
   };
-
+  
   const uploadImage = async (imageUri: string) => {
-    const clientId = '4d89c1a9e541ca2';
-    const auth = 'Client-ID ' + clientId;
+    const clientId = '4d89c1a9e541ca2'; 
+    const albumId = 'EhpVAMT'; 
 
     try {
-      const blob = await uriToBlob(imageUri);
+      const response = await fetch(imageUri);
+      if (!response.ok) {
+        throw new Error('Failed to fetch image');
+      }
+      const blob = await response.blob();
+
+      // Extract the file extension from the imageUri
+      const fileExtension = imageUri.split('.').pop() || 'jpg'; // Default to 'jpg' if extension is missing
 
       const formData = new FormData();
-      formData.append('image', blob, 'image.jpg');
+      // Append the image with the desired file extension
+      formData.append('image', blob, `image.${fileExtension}`);
+      formData.append('album', albumId);
 
-      const response = await fetch('https://api.imgur.com/3/image/', {
-        method: 'POST',
+      // Log the formData before making the Axios request
+      console.log('FormData:', formData);
+
+      const uploadResponse = await axios.post('https://api.imgur.com/3/upload', formData, {
         headers: {
-          Authorization: auth,
+          Authorization: `Client-ID ${clientId}`,
           'Content-Type': 'multipart/form-data',
         },
-        body: formData,
       });
 
-      const responseData = await response.json();
-
-      if (response.ok) {
+      if (uploadResponse.status === 200) {
         Alert.alert('Success', 'Image uploaded successfully');
-        console.log(responseData);
+        console.log('Uploaded Image URL:', uploadResponse.data.data.link); // This is the uploaded image URL
       } else {
         Alert.alert('Error', 'Failed to upload image');
-        console.error(responseData);
+        console.error('Upload Error:', uploadResponse.data);
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to upload image');
-      console.error(error);
+      console.error('Error:', error);
     }
   };
-
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       {imageSource && <Image source={{ uri: imageSource }} style={{ width: 200, height: 200 }} />}
@@ -76,5 +86,4 @@ function UploadImageScreen() {
     </View>
   );
 }
-
 export default UploadImageScreen;
