@@ -1,73 +1,65 @@
 import React, { useState, useEffect } from 'react';
 import { View, FlatList, Image, StyleSheet, Modal, TouchableOpacity, Text, Dimensions, TextInput } from 'react-native';
-import axios from 'axios';
 import Animated, { Easing, withSpring, withTiming, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
 import { useRoute } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Import the trash can icon
-import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome'; // Import FontAwesome icon
+import { projectStorage, projectFirestore, timestamp } from '../firebase/config';
+import 'firebase/compat/firestore';
 
-type ImgurImage = {
+// Define the type for Firestore images
+type FirestoreImage = {
   id: string;
-  link: string;
+  downloadUrl: string; 
   description: string;
-  uploadedImageUrl: string;
 };
 
 function ImgurAlbumScreen() {
   const route = useRoute();
-  const [images, setImages] = useState<ImgurImage[]>([]);
-  const [selectedImage, setSelectedImage] = useState<ImgurImage | null>(null);
+  const [images, setImages] = useState<FirestoreImage[]>([]); 
+  const [selectedImage, setSelectedImage] = useState<FirestoreImage | null>(null); 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newDescription, setNewDescription] = useState<string>("");
   const screenWidth = Dimensions.get('window').width;
+
   // Shared values for animations
-  const opacity = useSharedValue(0); // For fade-in animation
-  const translateY = useSharedValue(screenWidth); // For slide-up animation
+  const opacity = useSharedValue(0); 
+  const translateY = useSharedValue(screenWidth); 
 
   useEffect(() => {
-    const clientId = '4d89c1a9e541ca2';
-    const albumId = 'EhpVAMT';
-
-    axios
-      .get(`https://api.imgur.com/3/album/${albumId}/images`, {
-        headers: {
-          Authorization: `Client-ID ${clientId}`,
-        },
-      })
-      .then((response) => {
-        setImages(
-          response.data.data.map((item: any) => ({
-            id: item.id,
-            link: item.link,
-            description: item.description,
-          }))
-        );
-      })
-      .catch((error) => {
-        console.error('Error fetching images:', error);
-      });
+    // Fetch images from Firestore and update the state
+    const imagesRef = projectFirestore.collection('images');
+    const unsubscribe = imagesRef.onSnapshot((snapshot) => {
+      const newImages = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        downloadUrl: doc.data().downloadUrl, 
+        description: doc.data().description,
+      }));
+      setImages(newImages);
+    });
+  
+    return () => unsubscribe();
   }, []);
-
-  const openModal = (image: ImgurImage) => {
+  
+  // Open the modal and animate it
+  const openModal = (image: FirestoreImage) => {
     setSelectedImage(image);
-    setNewDescription(image.description); // Initialize the description input with the current description
+    setNewDescription(image.description); 
     opacity.value = withTiming(1, { duration: 50, easing: Easing.inOut(Easing.ease) });
-    translateY.value = withSpring(0, { damping: 6, stiffness: 200 }); // Adjust stiffness and damping values
+    translateY.value = withSpring(0, { damping: 6, stiffness: 200 }); 
     setIsModalVisible(true);
   };
 
+  // Close the modal and animate it
   const closeModal = () => {
     opacity.value = withTiming(0, { duration: 100, easing: Easing.inOut(Easing.ease) });
-    translateY.value = withSpring(screenWidth, { damping: 2, stiffness: 150 }); // Adjust stiffness and damping values
-    // After animations complete, reset the modal
+    translateY.value = withSpring(screenWidth, { damping: 2, stiffness: 150 }); 
     setTimeout(() => {
       setSelectedImage(null);
       setIsModalVisible(false);
-      setNewDescription(""); // Clear the description input
+      setNewDescription(""); 
     }, 200);
   };
 
-  // Animated styles for modal content
+  // Animated styles for modal images
   const modalStyles = useAnimatedStyle(() => {
     return {
       opacity: opacity.value,
@@ -75,63 +67,34 @@ function ImgurAlbumScreen() {
     };
   });
 
+  // Delete the selected image from Firebase Storage and Firestore
   const deleteImage = async () => {
     if (!selectedImage) return;
-
-    const clientId = '4d89c1a9e541ca2';
-    const imageId = selectedImage.id;
-
+    const imageRef = projectStorage.refFromURL(selectedImage.downloadUrl);
     try {
-      const response = await axios.delete(`https://api.imgur.com/3/image/${imageId}
-      `, {
-        headers: {
-          Authorization: `Client-ID ${clientId}`,
-        },
-      });
-
-      if (response.status === 200) {
-        // Image deleted successfully, you can update your local state or perform any necessary actions
-        console.log('Image deleted successfully');
-        closeModal(); // Close the modal after deletion
-      } else {
-        console.error('Failed to delete image:', response.data);
-      }
+      await imageRef.delete();
+      await projectFirestore.collection('images').doc(selectedImage.id).delete();
+      closeModal(); 
     } catch (error) {
       console.error('Error deleting image:', error);
     }
   };
-
+  
+  // Save the updated description to Firestore
   const saveDescription = async () => {
     if (!selectedImage || !newDescription) return;
-
-    const clientId = '4d89c1a9e541ca2';
-    const imageId = selectedImage.id;
-
     try {
-      const response = await axios.post(
-        `https://api.imgur.com/3/image/${imageId}`,
-        {
-          description: newDescription,
-        },
-        {
-          headers: {
-            Authorization: `Client-ID ${clientId}`,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        // Description updated successfully, you can update your local state or perform any necessary actions
-        console.log('Description updated successfully');
-        closeModal(); // Close the modal after updating
-      } else {
-        console.error('Failed to update description:', response.data);
-      }
+      await projectFirestore.collection('images').doc(selectedImage.id).update({
+        description: newDescription,
+      });
+      console.log('Description updated successfully');
+      closeModal();
     } catch (error) {
       console.error('Error updating description:', error);
     }
   };
 
+  // The view
   return (
     <View style={styles.container}>
       <FlatList
@@ -148,7 +111,7 @@ function ImgurAlbumScreen() {
                   height: screenWidth / 3 - 6,
                 },
               ]}
-              source={{ uri: item.link }}
+              source={{ uri: item.downloadUrl }}
             />
             {selectedImage === item && (
               <Text style={styles.imageDescription}>{item.description}</Text>
@@ -157,11 +120,11 @@ function ImgurAlbumScreen() {
         )}
       />
 
-<Modal visible={isModalVisible} transparent={true} onRequestClose={closeModal}>
+      <Modal visible={isModalVisible} transparent={true} onRequestClose={closeModal}>
         <View style={styles.modalContainer}>
           <Animated.View style={[styles.modalContent, modalStyles]}>
             {selectedImage && (
-              <Image style={styles.modalImage} source={{ uri: selectedImage.link }} />
+              <Image style={styles.modalImage} source={{ uri: selectedImage.downloadUrl }} />
             )}
             {selectedImage && (
               <TextInput
@@ -189,7 +152,6 @@ function ImgurAlbumScreen() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

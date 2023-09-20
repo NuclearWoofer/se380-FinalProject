@@ -26,7 +26,9 @@ function AboutScreen() {
           style={styles.link}
           onPress={() => Linking.openURL('mailto:miketatooine@gmail.com')}
         >
-          <Text style={styles.linkText}>Email Me</Text>
+          <Text style={styles.linkText}>Hire Me</Text>
+
+
         </TouchableOpacity>
       </View>
     </View>
