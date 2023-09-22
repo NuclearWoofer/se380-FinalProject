@@ -15,19 +15,19 @@ Why did you build it?
 
 What SDKs or libraries did you use?
 * ImagePicker SDK
-* Axios Library
+* Firebase
 
 
 Did you use anything we didn't cover in class?
-* Not really. Pretty sure axios was covered in the previous React class.
+* Not really. Firebase might be one of those things. Google's storage solution, pretty lightweight and easy to integrate.
 
 
 What was the most difficult part or the most time consuming?
-* Getting the Update, Upload, and Delete functionality to work. I kept getting forbidden errors that were holding me back but was unable to find a solution. Unsure if this is an Imgur permissions thing or a lack of authorization from Imgur’s part.
+* Before I switched back to Firebase, I was trying to use the Imgur API. I could not get the Update, Upload, and Delete functionality to work. I kept getting forbidden errors that were holding me back but was unable to find a solution. Unsure if this is an Imgur permissions thing or a lack of authorization from Imgur’s part.
 
 
 What did you find easy to accomplish?
-* Setting up the Gallery and the initial pull from Imgur.
+* Firebase was easy to use, the documentation really helped. 
 
 
 Answer any follow up questions from students or the instructor.
