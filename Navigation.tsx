@@ -5,7 +5,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import AboutScreen from './screens/AboutScreen';
 import UploadImageScreen from './screens/UploadImageScreen';
-import ImgurAlbumScreen from './screens/ImgurAlbumScreen';
+import AlbumScreen from './screens/AlbumScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -36,7 +36,7 @@ const AppNavigation = () => (
     >
       <Tab.Screen
         name="Gallery"
-        component={ImgurAlbumScreen}
+        component={AlbumScreen}
         options={{
           tabBarLabel: 'Album', 
         }}
