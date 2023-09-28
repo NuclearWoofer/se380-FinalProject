@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, FlatList, Image, StyleSheet, Modal, TouchableOpacity, Text, Dimensions, TextInput } from 'react-native';
+import {
+  View,
+  FlatList,
+  Image,
+  StyleSheet,
+  Modal,
+  TouchableOpacity,
+  Text,
+  Dimensions,
+  TextInput,
+  Keyboard,
+} from 'react-native';
 import Animated, { Easing, withSpring, withTiming, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
 import { useRoute } from '@react-navigation/native';
 import { projectStorage, projectFirestore } from '../firebase/config';
@@ -25,19 +36,23 @@ function ImgurAlbumScreen() {
   const translateY = useSharedValue(screenWidth); 
 
   useEffect(() => {
-    // Fetch images from Firestore and update the state
+    // Fetch images from Firestore and update the state, sorted by timestamp in descending order
     const imagesRef = projectFirestore.collection('images');
-    const unsubscribe = imagesRef.onSnapshot((snapshot) => {
-      const newImages = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        downloadUrl: doc.data().downloadUrl, 
-        description: doc.data().description,
-      }));
-      setImages(newImages);
-    });
+    const unsubscribe = imagesRef
+      .orderBy('timestamp', 'desc') // Sort by timestamp in descending order
+      .onSnapshot((snapshot) => {
+        const newImages = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          downloadUrl: doc.data().downloadUrl, 
+          description: doc.data().description,
+          timestamp: doc.data().timestamp, // Assuming you have a 'timestamp' field
+        }));
+        setImages(newImages);
+      });
   
     return () => unsubscribe();
   }, []);
+  
   
   // Open the modal and animate it
   const openModal = (image: FirestoreImage) => {
@@ -66,6 +81,25 @@ function ImgurAlbumScreen() {
       transform: [{ translateY: translateY.value }],
     };
   });
+
+  // Handle keyboard visibility
+  const keyboardDidShow = () => {
+    translateY.value = withSpring(-screenWidth / 3, { damping: 6, stiffness: 200 });
+  };
+
+  const keyboardDidHide = () => {
+    translateY.value = withSpring(0, { damping: 6, stiffness: 200 });
+  };
+
+  useEffect(() => {
+    const keyboardShowListener = Keyboard.addListener('keyboardDidShow', keyboardDidShow);
+    const keyboardHideListener = Keyboard.addListener('keyboardDidHide', keyboardDidHide);
+
+    return () => {
+      keyboardShowListener.remove();
+      keyboardHideListener.remove();
+    };
+  }, []);
 
   // Delete the selected image from Firebase Storage and Firestore
   const deleteImage = async () => {
@@ -141,17 +175,17 @@ function ImgurAlbumScreen() {
               <TouchableOpacity style={styles.deleteButton} onPress={deleteImage}>
                 <Text style={styles.deleteButtonText}>Delete</Text>
               </TouchableOpacity>
+              <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
             </View>
-
-            <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
           </Animated.View>
         </View>
       </Modal>
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -210,7 +244,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   closeButton: {
-    marginTop: 20,
+    flex: 1,
+    marginLeft: 10,
     padding: 10,
     backgroundColor: 'white',
     borderRadius: 5,
@@ -222,7 +257,7 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     flex: 1,
-    marginLeft: 10, // Add margin to separate buttons
+    marginLeft: 10,
     padding: 10,
     backgroundColor: 'red',
     borderRadius: 5,
