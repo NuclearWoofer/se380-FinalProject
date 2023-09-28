@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, FlatList, Image, StyleSheet, Modal, TouchableOpacity, Text, Dimensions, TextInput } from 'react-native';
 import Animated, { Easing, withSpring, withTiming, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
 import { useRoute } from '@react-navigation/native';
-import { projectStorage, projectFirestore, timestamp } from '../firebase/config';
+import { projectStorage, projectFirestore } from '../firebase/config';
 import 'firebase/compat/firestore';
 
 // Define the type for Firestore images
