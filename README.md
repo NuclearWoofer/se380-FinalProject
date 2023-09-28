@@ -9,3 +9,13 @@ This project must include:
         <li>Must make an HTTP request AND use one item from the Expo SDKLinks to an external site. OR use two items from the Expo SDK.Links to an external site
         <li>Animation.
         </ul>
+
+
+TODO: 
+<ul>
+<li>LoginPage
+<li>ProfilePage
+<li>Change the upload screen to a button?
+<li>Adding different collections (One page for AoS, 40k, etc)
+<li>Army Creator Feature? Pull in Datasheets / Warscrolls?
+</ul>
