@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, Image } from 'react-native'; // Import Image from 'react-native'
+import { View, TextInput, Button, StyleSheet, Text, Image } from 'react-native'; 
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native';
 
-// Define the type for the navigation prop
 type LoginScreenNavigationProp = StackNavigationProp<ParamListBase, 'Login'>;
 
 interface Props {
@@ -15,7 +14,7 @@ const LoginScreen = ({ navigation }: Props) => {
     const [password, setPassword] = useState('');
 
     const handleLogin = () => {
-        // Implement authentication logic here
+        // TODO: Implement authentication logic here
         // For demo purposes, navigate to home screen after login
         navigation.navigate('Gallery'); // Navigate to AlbumScreen
     };
@@ -23,7 +22,7 @@ const LoginScreen = ({ navigation }: Props) => {
     return (
         <View style={styles.container}>
             <Image
-                source={require('../images/beanFactory-logos_black.png')} // Adjust the path to your image file
+                source={require('../images/beanFactory-logos_black.png')}
                 style={styles.image}
             />
             <TextInput
@@ -40,7 +39,7 @@ const LoginScreen = ({ navigation }: Props) => {
                 secureTextEntry
             />
             <Button title="Login" onPress={handleLogin} />
-            <Text style={styles.footerText}>Don't have an account? Sign up</Text>
+            <Text style={styles.footerText}>Paint More Minis!</Text>
         </View>
     );
 };
