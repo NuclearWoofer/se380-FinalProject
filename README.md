@@ -1,21 +1,19 @@
-# SE380 React Native | Final Project
-
-This is my final project for SE380 React Native. 
-The goal of this project is to create an application that uses everything we have learned from the course this quarter. 
-This project must include:
-        <ul>
-        <li>Typescript
-        <li>Nested Navigation
-        <li>Must make an HTTP request AND use one item from the Expo SDKLinks to an external site. OR use two items from the Expo SDK.Links to an external site
-        <li>Animation.
-        </ul>
+# beanFactory Native
 
 
-TODO: 
-<ul>
-<li>~~Login Page~~
-<li>ProfilePage
-<li>Change the upload screen to a button?
-<li>Adding different collections (One page for AoS, 40k, etc)
-<li>Army Creator Feature? Pull in Datasheets / Warscrolls?
-</ul>
+I present my ongoing personal project developed in React Native, initially conceived as part of the SE380 React Native course, now serving as a platform for refining my React skills.
+
+Key highlights of this project include:
+- **Implementation of Typescript**: Leveraging the robustness and type safety offered by Typescript to ensure a more reliable and maintainable codebase.
+- **Nested Navigation**: Employing nested navigation structures to enhance user experience and streamline app navigation flow.
+- **Integration of Expo SDK**: Utilizing the powerful capabilities of the Expo SDK, I've seamlessly integrated essential functionalities such as making HTTP requests and incorporating Expo SDK components to enrich the app's features. 
+- **Dynamic Animation**: Enhancing user engagement through dynamic animations, albiet a small amount however less is more!
+
+I am eager to discuss the project in more detail and demonstrate how it aligns with the requirements and expectations of your esteemed organization.
+
+TODO:
+- ~~Login Page~~
+- Profile Page / About Page
+- Change the upload screen to a button?
+- Adding different collections (One page for AoS, 40k, etc)
+- Army Creator Feature? Pull in Datasheets / Warscrolls?
