@@ -19,21 +19,21 @@ import 'firebase/compat/firestore';
 // Define the type for Firestore images
 type FirestoreImage = {
   id: string;
-  downloadUrl: string; 
+  downloadUrl: string;
   description: string;
 };
 
 function AlbumScreen() {
   const route = useRoute();
-  const [images, setImages] = useState<FirestoreImage[]>([]); 
-  const [selectedImage, setSelectedImage] = useState<FirestoreImage | null>(null); 
+  const [images, setImages] = useState<FirestoreImage[]>([]);
+  const [selectedImage, setSelectedImage] = useState<FirestoreImage | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newDescription, setNewDescription] = useState<string>("");
   const screenWidth = Dimensions.get('window').width;
 
   // Shared values for animations
-  const opacity = useSharedValue(0); 
-  const translateY = useSharedValue(screenWidth); 
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(screenWidth);
 
   useEffect(() => {
     // Fetch images from Firestore and update the state, sorted by timestamp in descending order
@@ -43,34 +43,34 @@ function AlbumScreen() {
       .onSnapshot((snapshot) => {
         const newImages = snapshot.docs.map((doc) => ({
           id: doc.id,
-          downloadUrl: doc.data().downloadUrl, 
+          downloadUrl: doc.data().downloadUrl,
           description: doc.data().description,
           timestamp: doc.data().timestamp,
         }));
         setImages(newImages);
       });
-  
+
     return () => unsubscribe();
   }, []);
-  
-  
+
+
   // Open the modal and animate it
   const openModal = (image: FirestoreImage) => {
     setSelectedImage(image);
-    setNewDescription(image.description); 
+    setNewDescription(image.description);
     opacity.value = withTiming(1, { duration: 50, easing: Easing.inOut(Easing.ease) });
-    translateY.value = withSpring(0, { damping: 6, stiffness: 200 }); 
+    translateY.value = withSpring(0, { damping: 6, stiffness: 200 });
     setIsModalVisible(true);
   };
 
   // Close the modal and animate it
   const closeModal = () => {
     opacity.value = withTiming(0, { duration: 100, easing: Easing.inOut(Easing.ease) });
-    translateY.value = withSpring(screenWidth, { damping: 2, stiffness: 150 }); 
+    translateY.value = withSpring(screenWidth, { damping: 2, stiffness: 150 });
     setTimeout(() => {
       setSelectedImage(null);
       setIsModalVisible(false);
-      setNewDescription(""); 
+      setNewDescription("");
     }, 200);
   };
 
@@ -108,12 +108,12 @@ function AlbumScreen() {
     try {
       await imageRef.delete();
       await projectFirestore.collection('images').doc(selectedImage.id).delete();
-      closeModal(); 
+      closeModal();
     } catch (error) {
       console.error('Error deleting image:', error);
     }
   };
-  
+
   // Save the updated description to Firestore
   const saveDescription = async () => {
     if (!selectedImage || !newDescription) return;
