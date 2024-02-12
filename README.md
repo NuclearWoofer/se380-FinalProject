@@ -13,7 +13,7 @@ This project must include:
 
 TODO: 
 <ul>
-<li>LoginPage
+<li>~~Login Page~~
 <li>ProfilePage
 <li>Change the upload screen to a button?
 <li>Adding different collections (One page for AoS, 40k, etc)
